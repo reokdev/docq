@@ -1,11 +1,7 @@
 import {
-    BrainCogIcon,
-    Divide,
-    EyeIcon,
     GlobeIcon,
     MonitorSmartphoneIcon,
     ServerCogIcon,
-    ZapIcon
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link";
@@ -39,7 +35,7 @@ export default function Home() {
                         <p>Introducing <span>DocQ</span></p>
                         <br />
                         <p>Upload any document, and DocQ will generate a conversation between you and a virtual assistant.</p>
-                        <p>Then, simply ask your questions and DocQ will answer them in real-time, enhancing productivity and engagement.</p>
+                        <p>Then, simply ask your questions and DocQ will answer them in real-time, enhancing productivity & engagement.</p>
                     </div>
                     <Button asChild className="mt-10">
                         <Link href="/dashboard">
@@ -61,7 +57,7 @@ export default function Home() {
                 <div className="mx-auto max-w-7xl px-6 lg:px-8">
                     <dl className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 text-base leading-7 text-gray-600 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-4">
                         {features.map(feature => (
-                            <div className="relative pl-9">
+                            <div key={feature.title} className="relative pl-9">
                                 <dt className="inline font-semibold text-teal-400">
                                     <feature.icon aria-hidden="true" className="absolute left-1 top-1 h-5 w-5 text-teal-400"/>
                                 </dt>
