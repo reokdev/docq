@@ -47,7 +47,7 @@ function FileUploader() {
         } else {
             // toast notification
         }
-    }, [])
+    }, [handleUpload])
 
     const { getRootProps, getInputProps, isDragActive, isFocused, isDragAccept } = useDropzone({ 
         onDrop, 
@@ -67,7 +67,7 @@ function FileUploader() {
                         }`}
                         role='progressbar'
                         style={{
-                            // @ts-ignore
+                            // @ts-expect-error - style property is valid for radial-progress
                             '--value': progress, 
                             '--size': '12rem', 
                             '--thickness': '6px'
