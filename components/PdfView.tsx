@@ -89,7 +89,10 @@ function PdfView({ url }: { url: string }) {
     };
 
     const handleNextPage = () => {
-        setPageNumber(prev => Math.min(prev + 1, numPages));
+        setPageNumber(prev => {
+            if (numPages == null) return prev; 
+            return Math.min(prev + 1, numPages);
+        });
     };
 
     const handleMouseDown = (e: React.MouseEvent) => {
