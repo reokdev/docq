@@ -223,14 +223,14 @@ function PdfView({ url }: { url: string }) {
                 </Button>
                 
                 <p className="text-sm whitespace-nowrap px-1">
-                    Page {pageNumber} of {numPages}
+                    Page {pageNumber} of {numPages !== null ? numPages : 0}
                 </p>
 
                 <Button
                     variant="outline"
                     size="icon"
                     onClick={handleNextPage}
-                    disabled={pageNumber >= numPages}
+                    disabled={pageNumber >= (numPages !== null ? numPages : 0)}
                     className="shrink-0"
                 >
                     <ChevronRight className="h-4 w-4" />
