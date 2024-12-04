@@ -26,47 +26,49 @@ const features = [
 ]
 export default function Home() {
     return (
-        <main className="flex-1 overflow-scroll p-2 lg:p-5 bg-gradient-to-bl from-teal-600 via-teal-600/50 to-teal-600">
-            <div className="bg-white py-24 sm:py-32 rounded-md drop-shadow-xl">
-                <div className="flex flex-col justify-center items-center mx-auto max-w-7xl px-6 lg:px-8">
-                    <div className="mx-auto max-w-2xl smg: text-center">
-                        <h2 className="text-lg font-bold tracking-tight text-gray-900 sm:text-1xl" >Your new AI document friend</h2>
-                        <p className="mt-2 text-3xl leading-8 text-gray-600">Transform your PDF into interactive conversations</p>
-                        <p>Introducing <span>DocQ</span></p>
-                        <br />
-                        <p>Upload any document, and DocQ will generate a conversation between you and a virtual assistant.</p>
-                        <p>Then, simply ask your questions and DocQ will answer them in real-time, enhancing productivity & engagement.</p>
+        <main className="flex-1 overflow-auto p-4 bg-gradient-to-b from-blue-50 to-blue-100">
+            <div className="bg-white py-16 sm:py-24 rounded-lg shadow-md">
+                <div className="flex flex-col justify-center items-center mx-auto max-w-5xl px-4 lg:px-6">
+                    <div className="mx-auto max-w-2xl text-center">
+                        <h2 className="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">Your new AI document friend</h2>
+                        <p className="mt-4 text-lg leading-7 text-gray-700">Transform your PDF into interactive conversations</p>
+                        <p className="mt-2">Introducing <span className="font-semibold text-blue-600">DocQ</span></p>
+                        <p className="mt-4">Upload any document, and DocQ will generate a conversation between you and a virtual assistant.</p>
+                        <p className="mt-2">Then, simply ask your questions and DocQ will answer them in real-time, enhancing productivity & engagement.</p>
                     </div>
-                    <Button asChild className="mt-10">
+                    <Button asChild className="mt-8 bg-blue-600 text-white hover:bg-blue-500">
                         <Link href="/dashboard">
                             Get started
                         </Link>
                     </Button>
                 </div>
-                <div className="relative overflow-hidden pt-16">
-                    <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                <div className="relative overflow-hidden mt-12">
+                    <div className="mx-auto max-w-5xl px-4 lg:px-6">
                         <Image 
                             alt="DocQ"
                             src="https://i.imgur.com/VciRSTI.jpeg"
                             width={2432}
                             height={1442}
-                            className="mb-[-0%] rounded-xl shadow-2xl ring-1 ring-gray-900/10"
+                            className="rounded-lg shadow-lg"
                         />
                     </div>
                 </div>
-                <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                    <dl className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 text-base leading-7 text-gray-600 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-4">
+                <div className="mx-auto max-w-5xl px-4 lg:px-6 mt-12">
+                    <dl className="grid grid-cols-1 gap-8 text-base leading-7 text-gray-600 sm:grid-cols-2 lg:grid-cols-4">
                         {features.map(feature => (
-                            <div key={feature.title} className="relative pl-9">
-                                <dt className="inline font-semibold text-teal-400">
-                                    <feature.icon aria-hidden="true" className="absolute left-1 top-1 h-5 w-5 text-teal-400"/>
+                            <div key={feature.title} className="relative pl-10">
+                                <dt className="inline-block font-medium text-gray-900">
+                                    <feature.icon className="absolute left-0 top-0 h-6 w-6 text-blue-600" aria-hidden="true" />
+                                    {feature.title}
                                 </dt>
-                                <dd>{feature.description}</dd>
+                                <dd className="mt-2 text-gray-500">
+                                    {feature.description}
+                                </dd>
                             </div>
                         ))}
                     </dl>
                 </div>
             </div>
         </main>
-    );
+    )
 }

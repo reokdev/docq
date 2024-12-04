@@ -1,3 +1,5 @@
+'use client'
+
 import Documents from "@/components/Documents"
 
 function Dashboard() {
