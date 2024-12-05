@@ -1,70 +1,43 @@
-import { adminDb } from '@/firebaseAdmin';
-import { auth } from '@clerk/nextjs/server';
-import PdfView from '@/components/PdfView';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { notFound } from 'next/navigation';
+import Chat from "@/components/Chat";
+import PdfView from "@/components/PdfView";
+import { adminDb } from "@/firebaseAdmin";
+import { auth } from "@clerk/nextjs/server";
 
-type Props = {
+async function ChatToFilePage({
+  params: { id },
+}: {
   params: {
     id: string;
   };
-};
-
-export default async function Page({ params }: Props) {
+}) {
   const { userId } = await auth();
-  
+
   if (!userId) {
-    throw new Error('Unauthorized: Please sign in to continue');
+    throw new Error("User not found");
   }
-
-  const fileDoc = await adminDb
+  const ref = await adminDb
     .collection("users")
-    .doc(userId)
+    .doc(userId!)
     .collection("files")
-    .doc(params.id)
+    .doc(id)
     .get();
-  
-  if (!fileDoc.exists) {
-    notFound();
-  }
 
-  const url = fileDoc.data()?.url;
+  const url = ref.data()?.url;
 
   return (
-    <div className="flex flex-col lg:flex-row h-[calc(100vh-65px)]">
-      {/* Left side - PDF Viewer */}
-      <div className="flex-1 h-[60vh] lg:h-full bg-white p-4 overflow-y-auto border-b lg:border-b-0 lg:border-r border-gray-200">
-        <div className="h-full rounded-lg bg-gray-50 flex items-center justify-center">
-          <PdfView url={url} />
-        </div>
+    <div className="grid lg:grid-cols-5 h-full overflow-hidden">
+      {/* Right */}
+      <div className="col-span-5 lg:col-span-2 overflow-y-auto">
+        {/* Chat */}
+        <Chat id={id} />
       </div>
 
-      {/* Right side - Chat Interface */}
-      <div className="lg:w-[400px] flex-1 lg:flex-none bg-white flex flex-col h-[40vh] lg:h-full">
-        <div className="p-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold">Chat</h2>
-        </div>
-        
-        <div className="flex-1 overflow-y-auto p-4">
-          <div className="space-y-4">
-            <p className="text-gray-500 text-center">Ask DocQ about your PDF</p>
-          </div>
-        </div>
-
-        {/* Chat input */}
-        <div className="p-4 border-t border-gray-200">
-          <div className="flex space-x-2">
-            <Input
-              type="text"
-              placeholder="Type your message..."
-            />
-            <Button>
-              Send
-            </Button>
-          </div>
-        </div>
+      {/* Left */}
+      <div className="col-span-5 lg:col-span-3 bg-gray-100 border-r-2 lg:border-indigo-600 lg:-order-1 overflow-auto">
+        {/* PDFView */}
+        <PdfView url={url} />
       </div>
     </div>
   );
 }
+export default ChatToFilePage;

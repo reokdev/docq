@@ -2,13 +2,25 @@
 const nextConfig = {
   /* config options here */
   images: {
-    domains: ["i.imgur.com"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "i.imgur.com",
+      },
+      {
+        protocol: "https",
+        hostname: "img.clerk.com",
+      },
+    ],
   },
   webpack: (config) => {
     config.resolve.alias.canvas = false;
     config.resolve.fallback = {
       ...config.resolve.fallback,
       canvas: false,
+      net: false,
+      tls: false,
+      dns: false,
     };
     // Add this to handle dynamic route parameters
     config.experiments = {
