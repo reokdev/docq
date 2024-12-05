@@ -1,5 +1,11 @@
 {
   "version": 2,
+  "git": {
+    "deploymentEnabled": {
+      "master": true,
+      "development": true
+    }
+  },
   "builds": [
     {
       "src": "next.config.js",
