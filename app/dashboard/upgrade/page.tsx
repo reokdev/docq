@@ -13,7 +13,6 @@ import { useTransition } from "react";
 export type UserDetails = {
   email: string;
   name: string;
-  userId: string;
 };
 
 function PricingPage() {
@@ -22,20 +21,25 @@ function PricingPage() {
   const { hasActiveMembership, loading } = useSubscription();
   const [isPending, startTransition] = useTransition();
 
-  console.log(`User membership status: ${hasActiveMembership ? 'Active' : 'Inactive'}`);
-
   const handleUpgrade = () => {
     if (!user) return;
 
     const userDetails: UserDetails = {
       email: user.primaryEmailAddress?.toString()!,
       name: user.fullName!,
-      userId: user.id,
     };
 
     startTransition(async () => {
       const stripe = await getStripe();
+
+      if (hasActiveMembership) {
+        // create stripe portal...
+        const stripePortalUrl = await createStripePortal();
+        return router.push(stripePortalUrl);
+      }
+
       const sessionId = await createCheckoutSession(userDetails);
+
       await stripe?.redirectToCheckout({
         sessionId,
       });

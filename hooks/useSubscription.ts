@@ -2,7 +2,7 @@
 
 import { db } from "@/firebase";
 import { useUser } from "@clerk/nextjs";
-import { collection, doc, setDoc } from "firebase/firestore";
+import { collection, doc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { useCollection, useDocument } from "react-firebase-hooks/firestore";
 
@@ -29,37 +29,14 @@ function useSubscription() {
   );
 
   useEffect(() => {
-    if (!user) {
-      console.log("No user available");
-      return;
-    }
-
-    if (!snapshot) {
-      console.log("No snapshot available yet for user:", user.id);
-      return;
-    }
+    if (!snapshot) return;
 
     const data = snapshot.data();
-    if (!data) {
-      console.log("No data in snapshot for user:", user.id);
-      // Initialize the user document if it doesn't exist using client SDK
-      setDoc(doc(db, "users", user.id), {
-        hasActiveMembership: false,
-        email: user.emailAddresses[0].emailAddress,
-        name: user.fullName,
-      }, { merge: true }).catch(console.error);
-      return;
-    }
 
-    console.log("Subscription data:", {
-      hasActiveMembership: data.hasActiveMembership,
-      userId: user.id,
-      stripeCustomerId: data.stripeCustomerId,
-      timestamp: new Date().toISOString()
-    });
+    if (!data) return;
 
     setHasActiveMembership(data.hasActiveMembership);
-  }, [snapshot, user]);
+  }, [snapshot]);
 
   useEffect(() => {
     if (!filesSnapshot || hasActiveMembership === null) return;
@@ -74,9 +51,9 @@ function useSubscription() {
     );
 
     setIsOverFileLimit(files.length >= usersLimit);
-  }, [filesSnapshot, hasActiveMembership]);
+  }, [filesSnapshot, hasActiveMembership, PRO_LIMIT, FREE_LIMIT]);
 
   return { hasActiveMembership, loading, error, isOverFileLimit, filesLoading };
 }
 
-export default useSubscription;
+export default useSubscription; 

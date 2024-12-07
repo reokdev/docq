@@ -13,50 +13,42 @@ export async function createCheckoutSession(userDetails: UserDetails) {
     throw new Error("User not found");
   }
 
-  // First check if the user already has a stripeCustomerId
+  //   first check if the user already has a stripeCustomerId
   let stripeCustomerId;
 
-  const userRef = adminDb.collection("users").doc(userId);
-  const user = await userRef.get();
-  
-  if (!user.exists) {
-    // Create the user document if it doesn't exist
-    await userRef.set({
+  const user = await adminDb.collection("users").doc(userId).get();
+  stripeCustomerId = user.data()?.stripeCustomerId;
+
+  if (!stripeCustomerId) {
+    // create a new stripe customer
+    const customer = await stripe.customers.create({
       email: userDetails.email,
       name: userDetails.name,
-      hasActiveMembership: false,
-      createdAt: new Date().toISOString(),
-    });
-  }
-
-  stripeCustomerId = user.exists ? user.data()?.stripeCustomerId : null;
-
-  try {
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price: "price_1QTQ1KKStayc1Yz2DtVsi7tA",
-          quantity: 1,
-        },
-      ],
-      mode: "subscription",
-      success_url: `${getBaseUrl()}/dashboard?upgrade=true`,
-      cancel_url: `${getBaseUrl()}/upgrade`,
-      billing_address_collection: 'auto',
-      allow_promotion_codes: true,
       metadata: {
-        userId: userId,
+        userId,
       },
-      ...(stripeCustomerId 
-        ? { customer: stripeCustomerId } 
-        : { customer_email: userDetails.email }
-      ),
     });
 
-    return session.id;
-  } catch (error) {
-    console.error('Error creating checkout session:', error);
-    throw new Error(error instanceof Error ? error.message : 'Failed to create checkout session');
+    await adminDb.collection("users").doc(userId).set({
+      stripeCustomerId: customer.id,
+    });
+
+    stripeCustomerId = customer.id;
   }
+
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ["card"],
+    line_items: [
+      {
+        price: "price_1Pgn5DC8Alswqr61VAlju4va",
+        quantity: 1,
+      },
+    ],
+    mode: "subscription",
+    customer: stripeCustomerId,
+    success_url: `${getBaseUrl()}/dashboard?upgrade=true`,
+    cancel_url: `${getBaseUrl()}/upgrade`,
+  });
+
+  return session.id;
 }

@@ -9,48 +9,62 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(req: NextRequest) {
   console.log('=== WEBHOOK START ===', new Date().toISOString());
+  console.log('Environment:', process.env.NODE_ENV);
+  console.log('Webhook secret exists:', !!process.env.STRIPE_WEBHOOK_SECRET);
   
   const rawBody = await req.text();
   const signature = headers().get("stripe-signature");
   
   if (!signature || !process.env.STRIPE_WEBHOOK_SECRET) {
     console.error('Missing signature or webhook secret');
-    return new NextResponse("Configuration error", { status: 400 });
+    console.log('Signature:', signature);
+    console.log('Secret exists:', !!process.env.STRIPE_WEBHOOK_SECRET);
+    return new NextResponse("Configuration error", { status: 401 });
   }
 
   let event: Stripe.Event;
 
   try {
+    console.log('Attempting to verify webhook...');
     event = stripe.webhooks.constructEvent(
       rawBody,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET
     );
+    console.log('Webhook verified successfully');
     
     console.log('=== EVENT RECEIVED ===', event.type);
 
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
+      console.log("Full session data:", JSON.stringify(session, null, 2));
+      
       const userId = session.metadata?.userId;
       const customerId = session.customer as string;
 
-      console.log('Processing completed session:', {
-        userId,
-        customerId,
-        sessionId: session.id
-      });
-
       if (!userId) {
+        console.error("No userId in metadata");
         throw new Error('No userId in session metadata');
       }
 
-      await adminDb.collection("users").doc(userId).update({
+      const userRef = adminDb.collection("users").doc(userId);
+      const userDoc = await userRef.get();
+
+      if (!userDoc.exists) {
+        console.error("User document not found:", userId);
+        throw new Error('User document not found');
+      }
+
+      console.log('Current user data:', userDoc.data());
+
+      await userRef.update({
         hasActiveMembership: true,
         stripeCustomerId: customerId,
         updatedAt: new Date().toISOString(),
       });
 
-      console.log('Successfully updated user:', userId);
+      const updatedDoc = await userRef.get();
+      console.log('Updated user data:', updatedDoc.data());
     }
 
     return NextResponse.json({ received: true });
