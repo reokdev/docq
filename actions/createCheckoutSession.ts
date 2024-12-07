@@ -13,39 +13,50 @@ export async function createCheckoutSession(userDetails: UserDetails) {
     throw new Error("User not found");
   }
 
-  //   first check if the user already has a stripeCustomerId
-  let stripeCustomerId
+  // First check if the user already has a stripeCustomerId
+  let stripeCustomerId;
 
-  const user = await adminDb.collection("users").doc(userId).get();
-  stripeCustomerId = user.data()?.stripeCustomerId;
-
-  if (!stripeCustomerId) {
-    // Create a new Stripe customer if none exists
-    const customer = await stripe.customers.create({
-      email: user.data()?.email, // Use the user's email from Firebase
-    });
+  const userRef = adminDb.collection("users").doc(userId);
+  const user = await userRef.get();
   
-    stripeCustomerId = customer.id; // Get the new Stripe customer ID
-
-    // Update the user's document in Firebase with the new Stripe customer ID
-    await adminDb.collection("users").doc(userId).update({
-      stripeCustomerId: stripeCustomerId,
+  if (!user.exists) {
+    // Create the user document if it doesn't exist
+    await userRef.set({
+      email: userDetails.email,
+      name: userDetails.name,
+      hasActiveMembership: false,
+      createdAt: new Date().toISOString(),
     });
   }
 
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ["card"],
-    line_items: [
-      {
-        price: "price_1QSR1WKStayc1Yz2JA3IGrxo",
-        quantity: 1,
-      },
-    ],
-    mode: "subscription",
-    customer: stripeCustomerId,
-    success_url: `${getBaseUrl()}/dashboard?upgrade=true`,
-    cancel_url: `${getBaseUrl()}/upgrade`,
-  });
+  stripeCustomerId = user.exists ? user.data()?.stripeCustomerId : null;
 
-  return session.id;
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price: "price_1QTQ1KKStayc1Yz2DtVsi7tA",
+          quantity: 1,
+        },
+      ],
+      mode: "subscription",
+      success_url: `${getBaseUrl()}/dashboard?upgrade=true`,
+      cancel_url: `${getBaseUrl()}/upgrade`,
+      billing_address_collection: 'auto',
+      allow_promotion_codes: true,
+      metadata: {
+        userId: userId,
+      },
+      ...(stripeCustomerId 
+        ? { customer: stripeCustomerId } 
+        : { customer_email: userDetails.email }
+      ),
+    });
+
+    return session.id;
+  } catch (error) {
+    console.error('Error creating checkout session:', error);
+    throw new Error(error instanceof Error ? error.message : 'Failed to create checkout session');
+  }
 }

@@ -13,6 +13,7 @@ import { useTransition } from "react";
 export type UserDetails = {
   email: string;
   name: string;
+  userId: string;
 };
 
 function PricingPage() {
@@ -29,19 +30,12 @@ function PricingPage() {
     const userDetails: UserDetails = {
       email: user.primaryEmailAddress?.toString()!,
       name: user.fullName!,
+      userId: user.id,
     };
 
     startTransition(async () => {
       const stripe = await getStripe();
-
-      if (hasActiveMembership) {
-        // Display a confirmation message instead of redirecting
-        alert("You already have an active membership!");
-        return; // Prevent further action
-      }
-
       const sessionId = await createCheckoutSession(userDetails);
-
       await stripe?.redirectToCheckout({
         sessionId,
       });
